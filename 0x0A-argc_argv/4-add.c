@@ -2,115 +2,53 @@
 
 #include <stdlib.h>
 
-#include <stdbool.h>
-
-#include "main.h"
-
-
+#include <ctype.h>
 
 /**
 
- * is_num - iterate through each argv to test if it's a number
+ * main - adds positive numbers.
 
- * @argvv: A argv
+ * @argc: number of command line arguments.
 
- *
+ * @argv: array that contains the program command line arguments.
 
- * Return: true only if entire string is a number else false
-
- */
-
-
-
-bool is_num(char *argvv)
-
-{
-
-	int j = 0;
-
-
-
-	for (j = 0; argvv[j]; j++)
-
-	{
-
-		if (!(argvv[j] >= '0' && argvv[j] <= '9'))
-
-			return (0);
-
-	}
-
-
-
-	return (1);
-
-}
-
-
-
-/**
-
- * main - print sum if all arguments given are numbers
-
- * @argc: argument counter
-
- * @argv: arguments
-
- *
-
- * Return: 0 as success
+ * Return: 0 - success.
 
  */
-
-
 
 int main(int argc, char *argv[])
 
 {
 
-	int i = 0;
-
-	int sum = 0;
+	int i, j, add = 0;
 
 
 
-	if (argc == 1)
+	for (i = 1; i < argc; i++)
 
 	{
 
-		printf("0\n");
-
-		return (0);
-
-	}
-
-
-
-	while (i < argc)
-
-	{
-
-		if (is_num(argv[i]))
-
-			sum += atoi(argv[i]);
-
-		else
+		for (j = 0; argv[i][j] != '\0'; j++)
 
 		{
 
-			printf("Error\n");
+			if (!isdigit(argv[i][j]))
 
-			return (1);
+			{
+
+				printf("Error\n");
+
+				return (1);
+
+			}
 
 		}
 
-		i++;
+		add += atoi(argv[i]);
 
 	}
 
-
-
-	printf("%d\n", sum);
+	printf("%d\n", add);
 
 	return (0);
 
