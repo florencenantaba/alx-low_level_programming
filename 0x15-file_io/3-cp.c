@@ -1,75 +1,70 @@
 #include "main.h"
-
-void closer(int arg_files);
+#define BUFRSIZE 1204
+#define ER STDERR_FILENO
 
 /**
- * main - Entry Point
- * @argc: # of args
- * @argv: array pointer for args
- * Return: 0
- */
-int main(int argc, char *argv[])
+* copy_file - copies the content of a file to another file
+* @file1: file to copy from
+* @fil2: file to copy to
+* Return: nothing, or exit on failure
+**/
+void copy_file(const char *file1, char *fil2)
 {
-int file_from, file_to, file_from_r, wr_err;
-char buf[1024];
+	ssize_t count, count_out;
+	int f1, f2, fcls1, fcls2;
+	char bufr[BUFRSIZE];
+	mode_t mode;
 
-if (argc != 3)
-{
-dprintf(2, "Usage: cp file_from file_to\n");
-exit(97);
-}
-
-file_from = open(argv[1], O_RDONLY);
-if (file_from == -1)
-{
-dprintf(2, "Error: Can't read from file %s\n", argv[1]);
-exit(98);
-}
-
-file_to = open(argv[2], O_WRONLY | O_TRUNC | O_CREAT, 0664);
-if (file_to == -1)
-{
-dprintf(2, "Error: Can't write to %s\n", argv[2]);
-exit(99);
-}
-
-while (file_from_r >= 1024)
-{
-file_from_r = read(file_from, buf, 1024);
-if (file_from_r == -1)
-{
-dprintf(2, "Error: Can't read from file %s\n", argv[1]);
-closer(file_from);
-closer(file_to);
-exit(98);
-}
-wr_err = write(file_to, buf, file_from_r);
-if (wr_err == -1)
-{
-dprintf(2, "Error: Can't write to %s\n", argv[2]);
-exit(99);
-}
-}
-
-closer(file_from);
-closer(file_to);
-return (0);
+	f1 = open(file1, O_RDONLY);
+	if (f1 == -1)
+	{
+		dprintf(ER, "Error: Can't read from file %s\n", file1);
+		exit(98);
+	}
+	mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH;
+	f2 = open(fil2, O_CREAT | O_WRONLY | O_TRUNC, mode);
+	if (f2 == -1)
+		dprintf(ER, "Error: Can't write to %s\n", fil2), exit(99);
+	count = 1;
+	while (count > 0)
+	{
+		count = read(f1, bufr, BUFRSIZE);
+		if (count == -1)
+		{
+			dprintf(ER, "Error: Can't read from file %s\n", file1);
+			exit(98);
+		}
+		if (count > 0)
+		{
+			count_out = write(f2, bufr, count);
+			if (count_out == -1)
+			{
+				dprintf(ER, "Error: Can't write to %s\n", fil2);
+				exit(99);
+			}
+		}
+	}
+	fcls1 = close(f1);
+	if (fcls1 == -1)
+		dprintf(ER, "Error: Can't close fd %d\n", fcls1), exit(100);
+	fcls2 = close(f2);
+	if (fcls2 == -1)
+		dprintf(ER, "Error: Can't close fd %d\n", fcls2), exit(100);
 }
 
 /**
- * closer - close with error
- * @arg_files: argv 1 or 2
- * Return: void
- */
-void closer(int arg_files)
+* main - copies the content of a file to another file
+* @argc: number of arguements
+* @argv: pointer to arguement
+* Return: 0 on success, or exit with error message
+**/
+int main(int argc, char **argv)
 {
-int close_err;
-
-close_err = close(arg_files);
-
-if (close_err == -1)
-{
-dprintf(2, "Error: Can't close fd %d\n", arg_files);
-exit(100);
-}
+	if (argc != 3)
+	{
+		dprintf(ER, "Usage: cp file_from file_to\n");
+		exit(97);
+	}
+	copy_file(argv[1], argv[2]);
+	return (0);
 }
